@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الطلبيات الفاخر</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Cairo', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white;
+            }
+        }
+        .print-only {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white shadow-lg sticky top-0 z-30 no-print">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3 space-x-reverse">
+                <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center shadow-lg shadow-sky-500/30">
+                    <i class="fa-solid font-bold fa-box-open text-xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-wide">متجر الإبداع</h1>
+                    <p class="text-xs text-slate-400">نظام تسجيل وإدارة الطلبيات الاحترافي</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="openModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-sky-500/20 active:scale-95 text-sm sm:text-base">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>إضافة طلب جديد</span>
+                </button>
+                <button onclick="exportData()" title="تصدير النسخة الاحتياطية" class="bg-slate-700 hover:bg-slate-600 text-slate-200 p-2.5 rounded-xl transition-all text-sm">
+                    <i class="fa-solid fa-download"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow no-print">
+        
+        <!-- Stats Widgets -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <!-- Total Orders -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 mb-1">إجمالي الطلبات</p>
+                    <h3 id="stat-total" class="text-2xl font-bold text-slate-800">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-list-check"></i>
+                </div>
+            </div>
+
+            <!-- Pending Orders -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 mb-1">قيد الانتظار</p>
+                    <h3 id="stat-pending" class="text-2xl font-bold text-amber-600">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+            </div>
+
+            <!-- Completed Orders -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 mb-1">الطلبات المكتملة</p>
+                    <h3 id="stat-completed" class="text-2xl font-bold text-emerald-600">0</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 mb-1">إجمالي المبيعات</p>
+                    <h3 id="stat-revenue" class="text-xl font-bold text-slate-800">0 د.ج</h3>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <!-- Search -->
+            <div class="relative w-full md:w-96">
+                <i class="fa-solid fa-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="search-input" oninput="renderOrders()" placeholder="البحث باسم الزبون أو رقم الهاتف..." class="w-full pr-11 pl-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                <button onclick="setFilter('all')" id="filter-all" class="filter-btn active px-4 py-2 rounded-xl text-xs font-bold transition-all bg-sky-500 text-white shadow-sm">
+                    الكل
+                </button>
+                <button onclick="setFilter('معلق')" id="filter-معلق" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    قيد الانتظار
+                </button>
+                <button onclick="setFilter('جاري التجهيز')" id="filter-جاري التجهيز" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    جاري التجهيز
+                </button>
+                <button onclick="setFilter('تم التسليم')" id="filter-تم التسليم" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    تم التسليم
+                </button>
+                <button onclick="setFilter('ملغي')" id="filter-ملغي" class="filter-btn px-4 py-2 rounded-xl text-xs font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    ملغي
+                </button>
+            </div>
+        </div>
+
+        <!-- Orders Cards Grid -->
+        <div id="orders-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Orders Will Be Inserted Here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden text-center py-16 bg-white rounded-3xl border border-dashed border-slate-200">
+            <div class="w-20 h-20 mx-auto bg-slate-50 text-slate-300 rounded-full flex items-center justify-center text-3xl mb-4">
+                <i class="fa-solid fa-inbox"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-700 mb-1">لا توجد طلبات لعرضها</h3>
+            <p class="text-sm text-slate-400 mb-6">قم بإضافة طلب جديد أو تغيير خيارات البحث والتصفية.</p>
+            <button onclick="openModal()" class="bg-sky-500 hover:bg-sky-600 text-white px-5 py-2.5 rounded-xl font-semibold inline-flex items-center gap-2 transition-all shadow-md text-sm">
+                <i class="fa-solid fa-plus"></i>
+                <span>إضافة طلب الآن</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Modal Form (Add Order) -->
+    <div id="order-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-100">
+            <!-- Modal Header -->
+            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <h2 class="text-lg font-bold text-slate-800">تسجيل طلب جديد</h2>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Form Content -->
+            <form id="add-order-form" onsubmit="handleSaveOrder(event)" class="p-6 space-y-6">
+                
+                <!-- Section 1: Customer Info -->
+                <div>
+                    <h3 class="text-xs font-bold text-sky-600 tracking-wider uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span>بيانات الزبون</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">الاسم الكامل *</label>
+                            <input type="text" id="cust-name" required placeholder="مثال: أحمد محمد" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">رقم الهاتف *</label>
+                            <input type="tel" id="cust-phone" required placeholder="مثال: 0661234567" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">العنوان أو المنطقة *</label>
+                            <input type="text" id="cust-address" required placeholder="مثال: الجزائر العاصمة، حي أول نوفمبر" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="border-slate-100">
+
+                <!-- Section 2: Product Info -->
+                <div>
+                    <h3 class="text-xs font-bold text-sky-600 tracking-wider uppercase mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-box-archive"></i>
+                        <span>تفاصيل المنتج والطلب</span>
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="sm:col-span-3">
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">اسم المنتج / الطلبية *</label>
+                            <input type="text" id="prod-name" required placeholder="مثال: كعكة المناسبات / عطر خاص" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">السعر الفردي (د.ج) *</label>
+                            <input type="number" id="prod-price" required min="0" placeholder="0.00" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">الكمية *</label>
+                            <input type="number" id="prod-qty" required min="1" value="1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">حالة الطلب</label>
+                            <select id="order-status" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm bg-white">
+                                <option value="معلق">قيد الانتظار</option>
+                                <option value="جاري التجهيز">جاري التجهيز</option>
+                                <option value="تم التسليم">تم التسليم</option>
+                                <option value="ملغي">ملغي</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Image Upload & Preview -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-2">صورة المنتج</label>
+                    <div class="flex flex-col sm:flex-row gap-4 items-center">
+                        <div class="w-full sm:w-1/2">
+                            <label class="flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl p-4 cursor-pointer hover:border-sky-500 transition-all bg-slate-50/50">
+                                <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-400 mb-2"></i>
+                                <span class="text-xs font-semibold text-slate-600">اضغط لرفع صورة</span>
+                                <span class="text-[10px] text-slate-400 mt-1">PNG, JPG, WEBP (حجم صغير)</span>
+                                <input type="file" id="prod-image-input" accept="image/*" onchange="handleImageUpload(event)" class="hidden">
+                            </label>
+                        </div>
+
+                        <!-- Preview Container -->
+                        <div class="w-full sm:w-1/2 flex flex-col items-center">
+                            <div class="w-32 h-32 rounded-2xl border border-slate-200 overflow-hidden bg-slate-100 relative shadow-inner">
+                                <img id="image-preview" src="https://placehold.co/300x300/f1f5f9/94a3b8?text=صورة+المنتج" class="w-full h-full object-cover">
+                            </div>
+                            <span class="text-[11px] text-slate-400 mt-1">معاينة الصورة الحالية</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Notes -->
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ملاحظات أو تعليمات إضافية</label>
+                    <textarea id="order-notes" rows="2" placeholder="أكتب أي تفاصيل أخرى هنا..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all text-sm"></textarea>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-all">
+                        إلغاء
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold transition-all shadow-md">
+                        حفظ الطلب
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Modal View (Full Screen Image Preview) -->
+    <div id="full-image-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden no-print" onclick="closeImageModal()">
+        <div class="relative max-w-3xl w-full max-h-[90vh] flex items-center justify-center">
+            <img id="full-image-target" src="" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-slate-700">
+            <button onclick="closeImageModal()" class="absolute -top-10 left-0 text-white hover:text-sky-400 text-2xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Printable Receipt Modal (Hidden by default, used for Print Action) -->
+    <div id="receipt-container" class="print-only p-8 max-w-xl mx-auto font-sans">
+        <div class="border-2 border-slate-800 p-6 rounded-2xl space-y-4">
+            <div class="text-center border-b pb-4">
+                <h1 class="text-2xl font-bold text-slate-900">وصل طلب شراء الرسمية</h1>
+                <p class="text-sm text-slate-600">متجر الإبداع - خدمة العملاء</p>
+                <p id="rec-date" class="text-xs text-slate-400 mt-1"></p>
+            </div>
+
+            <div class="space-y-2 text-sm">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="font-bold">رقم الطلب:</span>
+                    <span id="rec-id" class="font-mono"></span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="font-bold">اسم الزبون:</span>
+                    <span id="rec-cust-name"></span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="font-bold">رقم الهاتف:</span>
+                    <span id="rec-cust-phone"></span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="font-bold">العنوان:</span>
+                    <span id="rec-cust-address"></span>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <h3 class="font-bold text-sm mb-2">تفاصيل المنتجات:</h3>
+                <table class="w-full text-sm text-right border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 border-b">
+                            <th class="p-2">المنتج</th>
+                            <th class="p-2">السعر</th>
+                            <th class="p-2">الكمية</th>
+                            <th class="p-2">الإجمالي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="rec-prod-name" class="p-2 border-b"></td>
+                            <td id="rec-prod-price" class="p-2 border-b"></td>
+                            <td id="rec-prod-qty" class="p-2 border-b"></td>
+                            <td id="rec-prod-total" class="p-2 border-b font-bold"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="rec-notes-container" class="text-xs text-slate-600 bg-slate-50 p-3 rounded-lg">
+                <span class="font-bold">ملاحظات: </span>
+                <span id="rec-notes"></span>
+            </div>
+
+            <div class="text-center pt-6 text-xs text-slate-500">
+                شكراً لثقتكم بنا! نتمنى لكم يوم سعيد.
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto no-print">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            جميع الحقوق محفوظة &copy; 2026 - نظام إدارة الطلبيات الذكي
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        let orders = [];
+        let currentFilter = 'all';
+        let currentImageBase64 = '';
+
+        // Initial Sample Data if empty
+        const initialSampleOrders = [
+            {
+                id: 'ORD-1001',
+                customerName: 'سارة العلمي',
+                phone: '0555123456',
+                address: 'الجزائر، دالي إبراهيم',
+                productName: 'حقيبة يد جلدية فاخرة',
+                price: 4500,
+                quantity: 1,
+                status: 'تم التسليم',
+                image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=400&q=80',
+                notes: 'توصيل قبل الساعة 4 مساءً',
+                date: '2026-10-24'
+            },
+            {
+                id: 'ORD-1002',
+                customerName: 'كريم بلحاج',
+                phone: '0770987654',
+                address: 'وهران، حي السلام',
+                productName: 'ساعة يد رجالية سوداء',
+                price: 8200,
+                quantity: 1,
+                status: 'جاري التجهيز',
+                image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+                notes: 'تغليف هدية ممتاز',
+                date: '2026-10-25'
+            }
+        ];
+
+        // On Page Load Initialization
+        window.onload = function() {
+            loadOrdersFromStorage();
+            renderOrders();
+        };
+
+        // Storage Handlers
+        function loadOrdersFromStorage() {
+            const stored = localStorage.getItem('app_orders_data');
+            if (stored) {
+                try {
+                    orders = JSON.parse(stored);
+                } catch(e) {
+                    orders = initialSampleOrders;
+                }
+            } else {
+                orders = initialSampleOrders;
+                saveOrdersToStorage();
+            }
+        }
+
+        function saveOrdersToStorage() {
+            localStorage.setItem('app_orders_data', JSON.stringify(orders));
+        }
+
+        // Render UI
+        function renderOrders() {
+            const grid = document.getElementById('orders-grid');
+            const emptyState = document.getElementById('empty-state');
+            const searchVal = document.getElementById('search-input').value.trim().toLowerCase();
+
+            grid.innerHTML = '';
+
+            // Filter logic
+            const filtered = orders.filter(order => {
+                const matchesFilter = currentFilter === 'all' || order.status === currentFilter;
+                const matchesSearch = order.customerName.toLowerCase().includes(searchVal) || 
+                                      order.phone.includes(searchVal) ||
+                                      order.productName.toLowerCase().includes(searchVal);
+                return matchesFilter && matchesSearch;
+            });
+
+            // Update Statistics
+            updateStats();
+
+            if (filtered.length === 0) {
+                grid.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            // Build Cards
+            filtered.forEach(order => {
+                const totalAmount = order.price * order.quantity;
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col justify-between';
+                
+                // Status badge styling
+                let statusBadge = '';
+                switch(order.status) {
+                    case 'معلق':
+                        statusBadge = '<span class="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-200 rounded-full text-xs font-bold">قيد الانتظار</span>';
+                        break;
+                    case 'جاري التجهيز':
+                        statusBadge = '<span class="px-3 py-1 bg-sky-50 text-sky-600 border border-sky-200 rounded-full text-xs font-bold">جاري التجهيز</span>';
+                        break;
+                    case 'تم التسليم':
+                        statusBadge = '<span class="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-xs font-bold">تم التسليم</span>';
+                        break;
+                    case 'ملغي':
+                        statusBadge = '<span class="px-3 py-1 bg-rose-50 text-rose-600 border border-rose-200 rounded-full text-xs font-bold">ملغي</span>';
+                        break;
+                }
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Image Container -->
+                        <div class="relative h-48 bg-slate-100 overflow-hidden group">
+                            <img src="${order.image || 'https://placehold.co/400x300/f1f5f9/94a3b8?text=لا+توجد+صورة'}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                <button onclick="openImageModal('${order.image}')" class="w-10 h-10 rounded-full bg-white text-slate-800 flex items-center justify-center hover:bg-sky-500 hover:text-white transition-all shadow-md">
+                                    <i class="fa-solid fa-expand"></i>
+                                </button>
+                            </div>
+                            <div class="absolute top-3 right-3">
+                                ${statusBadge}
+                            </div>
+                            <div class="absolute bottom-3 left-3 bg-slate-900/70 backdrop-blur-md text-white px-2.5 py-1 rounded-lg text-xs font-mono">
+                                ${order.id}
+                            </div>
+                        </div>
+
+                        <!-- Card Body -->
+                        <div class="p-5 space-y-4">
+                            <!-- Product Name & Price -->
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base leading-snug">${escapeHtml(order.productName)}</h4>
+                                    <span class="text-xs text-slate-400">الكمية: ${order.quantity}</span>
+                                </div>
+                                <div class="text-left">
+                                    <span class="text-xs text-slate-400 block">الإجمالي</span>
+                                    <span class="text-base font-extrabold text-sky-600">${totalAmount.toLocaleString()} د.ج</span>
+                                </div>
+                            </div>
+
+                            <hr class="border-slate-100">
+
+                            <!-- Customer Info -->
+                            <div class="space-y-2 text-xs text-slate-600">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-user text-slate-400 w-4"></i>
+                                    <span class="font-bold text-slate-700">${escapeHtml(order.customerName)}</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-phone text-slate-400 w-4"></i>
+                                    <span class="font-mono dir-ltr">${escapeHtml(order.phone)}</span>
+                                </div>
+                                <div class="flex items-start gap-2">
+                                    <i class="fa-solid fa-location-dot text-slate-400 w-4 mt-0.5"></i>
+                                    <span class="line-clamp-1">${escapeHtml(order.address)}</span>
+                                </div>
+                                ${order.notes ? `
+                                <div class="flex items-start gap-2 bg-slate-50 p-2 rounded-lg text-[11px] text-slate-500">
+                                    <i class="fa-solid fa-note-sticky text-amber-500 w-4 mt-0.5"></i>
+                                    <span>${escapeHtml(order.notes)}</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div class="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <!-- Status Quick Switcher -->
+                        <select onchange="updateOrderStatus('${order.id}', this.value)" class="text-xs font-semibold py-1.5 px-2.5 rounded-lg border border-slate-200 bg-white focus:outline-none">
+                            <option value="معلق" ${order.status === 'معلق' ? 'selected' : ''}>قيد الانتظار</option>
+                            <option value="جاري التجهيز" ${order.status === 'جاري التجهيز' ? 'selected' : ''}>جاري التجهيز</option>
+                            <option value="تم التسليم" ${order.status === 'تم التسليم' ? 'selected' : ''}>تم التسليم</option>
+                            <option value="ملغي" ${order.status === 'ملغي' ? 'selected' : ''}>ملغي</option>
+                        </select>
+
+                        <div class="flex items-center gap-1">
+                            <button onclick="printReceipt('${order.id}')" title="طباعة وصل" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-all text-xs">
+                                <i class="fa-solid fa-print"></i>
+                            </button>
+                            <button onclick="deleteOrder('${order.id}')" title="حذف" class="w-8 h-8 rounded-lg bg-white border border-slate-200 text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-all text-xs">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Stats Calculation
+        function updateStats() {
+            const total = orders.length;
+            const pending = orders.filter(o => o.status === 'معلق' || o.status === 'جاري التجهيز').length;
+            const completed = orders.filter(o => o.status === 'تم التسليم').length;
+            const revenue = orders
+                .filter(o => o.status === 'تم التسليم')
+                .reduce((sum, o) => sum + (o.price * o.quantity), 0);
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-pending').innerText = pending;
+            document.getElementById('stat-completed').innerText = completed;
+            document.getElementById('stat-revenue').innerText = revenue.toLocaleString() + ' د.ج';
+        }
+
+        // Filters
+        function setFilter(filterType) {
+            currentFilter = filterType;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('bg-sky-500', 'text-white', 'shadow-sm');
+                btn.classList.add('bg-slate-100', 'text-slate-600');
+            });
+
+            const activeBtn = document.getElementById(`filter-${filterType}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-slate-100', 'text-slate-600');
+                activeBtn.classList.add('bg-sky-500', 'text-white', 'shadow-sm');
+            }
+            renderOrders();
+        }
+
+        // Image Base64 Handler
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    currentImageBase64 = evt.target.result;
+                    document.getElementById('image-preview').src = currentImageBase64;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Add Order Handler
+        function handleSaveOrder(e) {
+            e.preventDefault();
+
+            const newOrder = {
+                id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+                customerName: document.getElementById('cust-name').value.trim(),
+                phone: document.getElementById('cust-phone').value.trim(),
+                address: document.getElementById('cust-address').value.trim(),
+                productName: document.getElementById('prod-name').value.trim(),
+                price: parseFloat(document.getElementById('prod-price').value) || 0,
+                quantity: parseInt(document.getElementById('prod-qty').value) || 1,
+                status: document.getElementById('order-status').value,
+                image: currentImageBase64 || 'https://placehold.co/400x300/f1f5f9/94a3b8?text=منتج+بدون+صورة',
+                notes: document.getElementById('order-notes').value.trim(),
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            orders.unshift(newOrder);
+            saveOrdersToStorage();
+            renderOrders();
+            closeModal();
+            resetForm();
+        }
+
+        // Quick Status Update
+        function updateOrderStatus(id, newStatus) {
+            const index = orders.findIndex(o => o.id === id);
+            if (index !== -1) {
+                orders[index].status = newStatus;
+                saveOrdersToStorage();
+                renderOrders();
+            }
+        }
+
+        // Delete Order
+        function deleteOrder(id) {
+            if (confirm('هل أنت تأكد من رغبتك في حذف هذا الطلب؟')) {
+                orders = orders.filter(o => o.id !== id);
+                saveOrdersToStorage();
+                renderOrders();
+            }
+        }
+
+        // Print Receipt Function
+        function printReceipt(id) {
+            const order = orders.find(o => o.id === id);
+            if (!order) return;
+
+            document.getElementById('rec-date').innerText = 'تاريخ الإصدار: ' + (order.date || new Date().toISOString().split('T')[0]);
+            document.getElementById('rec-id').innerText = order.id;
+            document.getElementById('rec-cust-name').innerText = order.customerName;
+            document.getElementById('rec-cust-phone').innerText = order.phone;
+            document.getElementById('rec-cust-address').innerText = order.address;
+            
+            document.getElementById('rec-prod-name').innerText = order.productName;
+            document.getElementById('rec-prod-price').innerText = order.price.toLocaleString() + ' د.ج';
+            document.getElementById('rec-prod-qty').innerText = order.quantity;
+            document.getElementById('rec-prod-total').innerText = (order.price * order.quantity).toLocaleString() + ' د.ج';
+
+            if (order.notes) {
+                document.getElementById('rec-notes-container').style.display = 'block';
+                document.getElementById('rec-notes').innerText = order.notes;
+            } else {
+                document.getElementById('rec-notes-container').style.display = 'none';
+            }
+
+            window.print();
+        }
+
+        // Export Data (Backup)
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orders, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `orders_backup_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Modal Helpers
+        function openModal() {
+            document.getElementById('order-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('order-modal').classList.add('hidden');
+            resetForm();
+        }
+
+        function resetForm() {
+            document.getElementById('add-order-form').reset();
+            currentImageBase64 = '';
+            document.getElementById('image-preview').src = 'https://placehold.co/300x300/f1f5f9/94a3b8?text=صورة+المنتج';
+        }
+
+        function openImageModal(imgSrc) {
+            if (!imgSrc) return;
+            document.getElementById('full-image-target').src = imgSrc;
+            document.getElementById('full-image-modal').classList.remove('hidden');
+        }
+
+        function closeImageModal() {
+            document.getElementById('full-image-modal').classList.add('hidden');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text.replace(/&/g, "&amp;")
+                       .replace(/</g, "&lt;")
+                       .replace(/>/g, "&gt;")
+                       .replace(/"/g, "&quot;")
+                       .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
